@@ -49,8 +49,8 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(TEXT("UpDown"), this, AArcher::KeyUpDown);
-	PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, AArcher::KeyLeftRight);
+	PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AArcher::KeyUpDown);
+	PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AArcher::KeyLeftRight);
 
 }
 
