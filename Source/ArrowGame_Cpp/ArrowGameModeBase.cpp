@@ -6,5 +6,11 @@
 
 AArrowGameModeBase::AArrowGameModeBase()
 {
-	DefaultPawnClass = AArcher::StaticClass();
+	static ConstructorHelpers::FClassFinder<AArcher> BP_Player(TEXT("/Script/Engine.Blueprint'/Game/BP_Player.BP_Player_C'"));
+	
+	if (BP_Player.Succeeded())
+	{
+		DefaultPawnClass = BP_Player.Class;
+	}
+
 }
