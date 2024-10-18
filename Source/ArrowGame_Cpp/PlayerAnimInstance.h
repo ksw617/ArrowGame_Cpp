@@ -17,13 +17,15 @@ private:
 	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float Speed;
 	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	float Horizontal;
+	bool ShouldMove; 
 	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	float Vertical;
+	bool IsFalling;
 	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	bool ShouldMove; // 이거 구현해보세요.
+	FVector Velocity;
 	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	bool IsFalling; // 이것도 구현 해보세요. 
+	float YawOffset;
+	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	FRotator AimRotation;
 
 public:
 	UPROPERTY(VisibleAnywhere)
@@ -34,5 +36,7 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+public:
+	void PlayFireMontage(); // 외부에서 Montage 플레이 해줄 함수
 	
 };

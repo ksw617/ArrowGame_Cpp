@@ -4,6 +4,7 @@
 #include "PlayerAnimInstance.h"
 #include "Archer.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UPlayerAnimInstance::NativeInitializeAnimation()
 {
@@ -33,15 +34,32 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (IsValid(Archer))
 	{
-		FVector Velocity = CharacterMovement->Velocity;
+		Velocity = CharacterMovement->Velocity;
 		FRotator Rotation = Archer->GetActorRotation();
 		FVector UnrotateVector = Rotation.UnrotateVector(Velocity);
 
-		Vertical = UnrotateVector.X;
-		Horizontal = UnrotateVector.Y;
+		UnrotateVector.Normalize();
 
-		Speed = Archer->GetVelocity().Size2D();
+		Speed = Velocity.Size2D();
+
+		auto Acceleration = CharacterMovement->GetCurrentAcceleration();
+		ShouldMove = Speed > 3.f && Acceleration != FVector::Zero();
+
+		IsFalling = CharacterMovement->IsFalling();
+
+		AimRotation = Archer->GetBaseAimRotation();
+		FRotator RotFromX = UKismetMathLibrary::MakeRotFromX(Velocity);
+
+		FRotator DeltaRotation = AimRotation - RotFromX;
+		DeltaRotation.Normalize();  
+
+		YawOffset = DeltaRotation.Yaw;
 
 	}
 
+}
+
+void UPlayerAnimInstance::PlayFireMontage()
+{
+	UE_LOG(LogTemp, Log, TEXT("Fire"));
 }

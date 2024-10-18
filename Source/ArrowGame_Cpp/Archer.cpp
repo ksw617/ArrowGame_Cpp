@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
+#include "PlayerAnimInstance.h"
 
 // Sets default values
 AArcher::AArcher()
@@ -20,6 +21,7 @@ AArcher::AArcher()
 
 	SpringArm->TargetArmLength = 400.f;
 	SpringArm->SetRelativeRotation(FRotator(-35.f, 0.f, 0.f));
+	SpringArm->bUsePawnControlRotation = true;
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonSparrow/Characters/Heroes/Sparrow/Meshes/Sparrow.Sparrow'"));
 	if (SM.Succeeded())
@@ -34,6 +36,9 @@ AArcher::AArcher()
 void AArcher::BeginPlay()
 {
 	Super::BeginPlay();
+
+	auto AnimInstance = GetMesh()->GetAnimInstance();
+	PlayerAnimInstance = Cast<UPlayerAnimInstance>(AnimInstance);
 	
 }
 
@@ -51,6 +56,11 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AArcher::KeyUpDown);
 	PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AArcher::KeyLeftRight);
+	PlayerInputComponent->BindAxis(TEXT("LookUpDown"), this, &AArcher::MouseLookUpDown);
+	PlayerInputComponent->BindAxis(TEXT("LookLeftRight"), this, &AArcher::MouseLookLeftRight);
+
+	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AArcher::Jump);
+	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &AArcher::Fire);
 
 }
 
@@ -62,5 +72,25 @@ void AArcher::KeyUpDown(float Value)
 void AArcher::KeyLeftRight(float Value)
 {
 	AddMovementInput(GetActorRightVector(), Value);
+}
+
+void AArcher::MouseLookLeftRight(float Value)
+{
+	AddControllerYawInput(Value);
+}
+
+void AArcher::MouseLookUpDown(float Value)
+{
+	AddControllerPitchInput(Value);
+}
+
+void AArcher::Fire()
+{
+	if (IsValid(PlayerAnimInstance))
+	{
+		PlayerAnimInstance->PlayFireMontage();
+
+	}
+	
 }
 
