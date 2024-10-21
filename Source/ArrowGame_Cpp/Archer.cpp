@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "PlayerAnimInstance.h"
+#include "Arrow.h"
 
 // Sets default values
 AArcher::AArcher()
@@ -21,6 +22,7 @@ AArcher::AArcher()
 
 	SpringArm->TargetArmLength = 400.f;
 	SpringArm->SetRelativeRotation(FRotator(-35.f, 0.f, 0.f));
+	SpringArm->SocketOffset = FVector(0.f, 120.f, 75.f); // Ãß°¡
 	SpringArm->bUsePawnControlRotation = true;
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonSparrow/Characters/Heroes/Sparrow/Meshes/Sparrow.Sparrow'"));
@@ -89,6 +91,14 @@ void AArcher::Fire()
 	if (IsValid(PlayerAnimInstance))
 	{
 		PlayerAnimInstance->PlayFireMontage();
+
+		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
+		FVector SocketLocation = SocketTransform.GetLocation();
+		FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
+		FActorSpawnParameters params;
+		params.Owner = this;
+
+		auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, params);
 
 	}
 	

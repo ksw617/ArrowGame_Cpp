@@ -6,9 +6,21 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
-void UPlayerAnimInstance::NativeInitializeAnimation()
+//void UPlayerAnimInstance::NativeInitializeAnimation()
+//{
+//	Super::NativeInitializeAnimation();
+//
+//
+//}
+
+UPlayerAnimInstance::UPlayerAnimInstance()
 {
-	Super::NativeInitializeAnimation();
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM(TEXT("/Script/Engine.AnimMontage'/Game/ParagonSparrow/Characters/Heroes/Sparrow/Animations/Primary_Fire_Med_Montage.Primary_Fire_Med_Montage'"));
+
+	if (AM.Succeeded())
+	{
+		FireMontage = AM.Object;
+	}
 }
 
 void UPlayerAnimInstance::NativeBeginPlay()
@@ -61,5 +73,11 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void UPlayerAnimInstance::PlayFireMontage()
 {
-	UE_LOG(LogTemp, Log, TEXT("Fire"));
+	if (IsValid(FireMontage))
+	{
+		if (!Montage_IsPlaying(FireMontage))
+		{
+			Montage_Play(FireMontage);
+		}
+	}
 }

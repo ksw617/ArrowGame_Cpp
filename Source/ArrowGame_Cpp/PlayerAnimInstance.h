@@ -32,11 +32,15 @@ public:
 	class AArcher* Archer;
 	UPROPERTY(VisibleAnywhere)
 	class UCharacterMovementComponent* CharacterMovement;
+	UPROPERTY(VisibleAnywhere)
+	UAnimMontage* FireMontage;
+
 public:
-	virtual void NativeInitializeAnimation() override;
+	UPlayerAnimInstance();
+	//virtual void NativeInitializeAnimation() override;
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 public:
-	void PlayFireMontage(); // 외부에서 Montage 플레이 해줄 함수
+	void PlayFireMontage();
 	
 };
