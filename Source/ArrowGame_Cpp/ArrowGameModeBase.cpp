@@ -6,7 +6,7 @@
 
 AArrowGameModeBase::AArrowGameModeBase()
 {
-	static ConstructorHelpers::FClassFinder<AArcher> BP_Player(TEXT("/Script/Engine.Blueprint'/Game/BP_Player.BP_Player_C'"));
+	static ConstructorHelpers::FClassFinder<AArcher> BP_Player(TEXT("/Script/Engine.Blueprint'/Game/Blueprints/BP_Player.BP_Player_C'"));
 	
 	if (BP_Player.Succeeded())
 	{

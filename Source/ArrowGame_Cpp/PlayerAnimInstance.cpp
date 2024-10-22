@@ -6,12 +6,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
-//void UPlayerAnimInstance::NativeInitializeAnimation()
-//{
-//	Super::NativeInitializeAnimation();
-//
-//
-//}
 
 UPlayerAnimInstance::UPlayerAnimInstance()
 {
@@ -66,6 +60,57 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		DeltaRotation.Normalize();  
 
 		YawOffset = DeltaRotation.Yaw;
+
+		if (ShouldMove || IsFalling)
+		{
+			RotateYaw = FMath::FInterpTo(RotateYaw, 0.f, DeltaSeconds, 20.f);
+			MovingRotation = Archer->GetActorRotation();
+			PrevRotation = MovingRotation;
+		}
+		else
+		{
+			PrevRotation = MovingRotation;
+			MovingRotation = Archer->GetActorRotation();
+			FRotator Deleta = MovingRotation - PrevRotation;
+			Deleta.Normalize();
+			RotateYaw -= Deleta.Yaw;
+
+			float TurnValue = GetCurveValue("Turn");
+
+			if (TurnValue > 0.f)
+			{
+				PrevDistanceCurve = DistanceCurve;
+				DistanceCurve = GetCurveValue("DistanceCurve");
+				DeltaDistanceCurve = DistanceCurve - PrevDistanceCurve;
+				if (RotateYaw > 0.f)
+				{
+					RotateYaw -= DeltaDistanceCurve;
+				}
+				else
+				{
+					RotateYaw += DeltaDistanceCurve;
+				}
+
+				float AbsRotateYawOffset = FMath::Abs(RotateYaw);
+				if (AbsRotateYawOffset > 0.f)
+				{
+					float YawExcess = AbsRotateYawOffset - 90.f;
+					if (RotateYaw > 0.f)
+					{
+						RotateYaw -= YawExcess;
+					}
+					else
+					{
+						RotateYaw += YawExcess;
+					}
+
+				}
+
+
+			}
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("RotateYaw : %f"), RotateYaw);
 
 	}
 
