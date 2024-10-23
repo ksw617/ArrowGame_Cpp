@@ -110,8 +110,7 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			}
 		}
 
-		UE_LOG(LogTemp, Log, TEXT("RotateYaw : %f"), RotateYaw);
-
+	
 	}
 
 }

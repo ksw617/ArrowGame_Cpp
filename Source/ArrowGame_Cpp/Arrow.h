@@ -19,6 +19,8 @@ private:
 	class UBoxComponent* CollisionBox;
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* ProjectileMovement;
+	UPROPERTY(VisibleAnywhere)
+	class UParticleSystem* HitParticleSystem;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -31,5 +33,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+public:
+	UFUNCTION()
+	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 
 };
