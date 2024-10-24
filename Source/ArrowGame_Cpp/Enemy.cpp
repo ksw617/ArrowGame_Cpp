@@ -2,6 +2,7 @@
 
 
 #include "Enemy.h"
+#include "EnemyAIController.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -16,6 +17,8 @@ AEnemy::AEnemy()
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
 
 	}
+
+	AIControllerClass = AEnemyAIController::StaticClass();
 
 }
 
