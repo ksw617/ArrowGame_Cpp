@@ -10,6 +10,9 @@ UCLASS()
 class ARROWGAME_CPP_API AEnemy : public ACharacter
 {
 	GENERATED_BODY()
+private:
+	UPROPERTY(VisibleAnywhere)
+	class UEnemyAnimInstance* EnemyAnimInstace;
 
 public:
 	// Sets default values for this character's properties
@@ -26,4 +29,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	void Attack();
+public:
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 };

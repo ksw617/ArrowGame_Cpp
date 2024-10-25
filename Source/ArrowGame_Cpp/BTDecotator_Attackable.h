@@ -13,5 +13,9 @@ UCLASS()
 class ARROWGAME_CPP_API UBTDecotator_Attackable : public UBTDecorator
 {
 	GENERATED_BODY()
+public:
+	UBTDecotator_Attackable();
+public:
+	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
 	
 };
