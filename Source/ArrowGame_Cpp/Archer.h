@@ -16,7 +16,10 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* Camera;
 	UPROPERTY(VisibleAnywhere)
-	class UPlayerAnimInstance* PlayerAnimInstance; // Ãß°¡
+	class UPlayerAnimInstance* PlayerAnimInstance; 
+public:
+	UPROPERTY(VisibleAnywhere)
+	class UMyActorComponent* MyActorComponent;
 
 public:
 	// Sets default values for this character's properties

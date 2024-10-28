@@ -58,15 +58,21 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AEnemy::Attack()
 {
-	auto EnemyAnimInstace = Cast<UEnemyAnimInstance>(GetMesh()->GetAnimInstance());
-	if (IsValid(EnemyAnimInstace))
+	if (!IsAttacking)
 	{
-		EnemyAnimInstace->PlayAttackMontage();
+		IsAttacking = true;
+		
+		if (IsValid(EnemyAnimInstace))
+		{
+			EnemyAnimInstace->PlayAttackMontage();
+
+		}
 	}
+
 }
 
 void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	UE_LOG(LogTemp, Log, TEXT("OnAttackMontageEnded"));
+	IsAttacking = false;
 }
 

@@ -8,6 +8,8 @@
 #include "PlayerAnimInstance.h"
 #include "Arrow.h"
 
+#include "MyActorComponent.h"
+
 // Sets default values
 AArcher::AArcher()
 {
@@ -28,10 +30,11 @@ AArcher::AArcher()
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonSparrow/Characters/Heroes/Sparrow/Meshes/Sparrow.Sparrow'"));
 	if (SM.Succeeded())
 	{
-		//UE_LOG(LogTemp, Log, TEXT("TEST"));
 		GetMesh()->SetSkeletalMesh(SM.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
 	}
+
+	MyActorComponent = CreateDefaultSubobject<UMyActorComponent>(TEXT("MyActorComponent"));
 }
 
 // Called when the game starts or when spawned

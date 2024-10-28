@@ -13,10 +13,13 @@ class ARROWGAME_CPP_API AEnemy : public ACharacter
 private:
 	UPROPERTY(VisibleAnywhere)
 	class UEnemyAnimInstance* EnemyAnimInstace;
-
+private:
+	bool IsAttacking = false;
 public:
 	// Sets default values for this character's properties
 	AEnemy();
+public:
+	bool GetIsAttacking() const { return IsAttacking; }
 
 protected:
 	// Called when the game starts or when spawned

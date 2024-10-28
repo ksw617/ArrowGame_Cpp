@@ -14,7 +14,7 @@ class ARROWGAME_CPP_API UBTTask_Attack : public UBTTaskNode
 {
 	GENERATED_BODY()
 private:
-	bool IsAttacking = false;
+	//bool IsAttacking = false;
 public:
 	UBTTask_Attack();
 public:

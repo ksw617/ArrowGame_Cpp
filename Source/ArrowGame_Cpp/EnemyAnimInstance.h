@@ -16,8 +16,15 @@ class ARROWGAME_CPP_API UEnemyAnimInstance : public UAnimInstance
 public:
 	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	UAnimMontage* AttackMontage;
+	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	class UCharacterMovementComponent* CharacterMovement;
+	UPROPERTY(Category = "Animation", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	bool ShouldMove = false;
 public:
 	UEnemyAnimInstance();
+public:
+	virtual void NativeBeginPlay() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 public:
 	void PlayAttackMontage();
 	
