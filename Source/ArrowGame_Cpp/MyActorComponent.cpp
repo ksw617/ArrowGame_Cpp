@@ -2,17 +2,16 @@
 
 
 #include "MyActorComponent.h"
+#include "MyGameInstance.h"
+#include "Kismet/GameplayStatics.h" // UGameplayStatics 사용하기 위해서
 
-// Sets default values for this component's properties
+
 UMyActorComponent::UMyActorComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
 	Level = 1;
 
-	// ...
 }
 
 
@@ -22,18 +21,30 @@ void UMyActorComponent::InitializeComponent()
 	SetLevel(Level);
 }
 
-// Called when the game starts
 void UMyActorComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Log, TEXT("UMyActorComponent::BeginPlay"));
-	// ...
 	
 }
 
 void UMyActorComponent::SetLevel(int32 Lv)
 {
+	//auto MyGameInstance = Cast<UMyGameInstance>(GetWorld()->GetGameInstance());
+	auto MyGameInstance = Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if (MyGameInstance)
+	{
+		auto CharacterData = MyGameInstance->GetCharacterData(Lv);
+		if (CharacterData)
+		{
+			Level = CharacterData->Level;
+			MaxHp = CharacterData->MaxHp;
+			Hp = MaxHp;
+
+			UE_LOG(LogTemp, Log, TEXT("Lv : %d"), Level);
+			UE_LOG(LogTemp, Log, TEXT("Hp : %d"), Hp);
+		}
+
+	}
 }
 
 void UMyActorComponent::OnDamaged(float DamageAmount)

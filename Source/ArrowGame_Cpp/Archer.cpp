@@ -5,27 +5,46 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
-#include "PlayerAnimInstance.h"
-#include "Arrow.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
-#include "MyActorComponent.h"
+//Input
+#include "GameFramework/Controller.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
 
 // Sets default values
 AArcher::AArcher()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// Set size for collision capsule
+	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
-	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("springArm"));
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
 
-	SpringArm->SetupAttachment(GetCapsuleComponent());
-	Camera->SetupAttachment(SpringArm);
+	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
-	SpringArm->TargetArmLength = 400.f;
-	SpringArm->SetRelativeRotation(FRotator(-35.f, 0.f, 0.f));
-	SpringArm->SocketOffset = FVector(0.f, 120.f, 75.f); // 추가
-	SpringArm->bUsePawnControlRotation = true;
+	GetCharacterMovement()->JumpZVelocity = 700.f;
+	GetCharacterMovement()->AirControl = 0.35f;
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
+
+
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
+	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	CameraBoom->SocketOffset = FVector(0.f, 120.f, 75.f); // 추가
+
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
+	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonSparrow/Characters/Heroes/Sparrow/Meshes/Sparrow.Sparrow'"));
 	if (SM.Succeeded())
@@ -33,24 +52,12 @@ AArcher::AArcher()
 		GetMesh()->SetSkeletalMesh(SM.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
 	}
-
-	MyActorComponent = CreateDefaultSubobject<UMyActorComponent>(TEXT("MyActorComponent"));
 }
 
 // Called when the game starts or when spawned
 void AArcher::BeginPlay()
 {
 	Super::BeginPlay();
-
-	auto AnimInstance = GetMesh()->GetAnimInstance();
-	PlayerAnimInstance = Cast<UPlayerAnimInstance>(AnimInstance);
-	
-}
-
-// Called every frame
-void AArcher::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
 }
 
@@ -59,51 +66,29 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(TEXT("UpDown"), this, &AArcher::KeyUpDown);
-	PlayerInputComponent->BindAxis(TEXT("LeftRight"), this, &AArcher::KeyLeftRight);
-	PlayerInputComponent->BindAxis(TEXT("LookUpDown"), this, &AArcher::MouseLookUpDown);
-	PlayerInputComponent->BindAxis(TEXT("LookLeftRight"), this, &AArcher::MouseLookLeftRight);
-
-	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AArcher::Jump);
-	PlayerInputComponent->BindAction(TEXT("Fire"), EInputEvent::IE_Pressed, this, &AArcher::Fire);
-
-}
-
-void AArcher::KeyUpDown(float Value)
-{
-	AddMovementInput(GetActorForwardVector(), Value);
-}
-
-void AArcher::KeyLeftRight(float Value)
-{
-	AddMovementInput(GetActorRightVector(), Value);
-}
-
-void AArcher::MouseLookLeftRight(float Value)
-{
-	AddControllerYawInput(Value);
-}
-
-void AArcher::MouseLookUpDown(float Value)
-{
-	AddControllerPitchInput(Value);
-}
-
-void AArcher::Fire()
-{
-	if (IsValid(PlayerAnimInstance))
+	// Add Input Mapping Context
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		PlayerAnimInstance->PlayFireMontage();
-
-		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
-		FVector SocketLocation = SocketTransform.GetLocation();
-		FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
-		FActorSpawnParameters params;
-		params.Owner = this;
-
-		auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, params);
-
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
 	}
-	
+
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+
+		// Jumping
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		//// Moving
+		//EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AArcher::Move);
+		//
+		//// Looking
+		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AArcher::Look);
+	}
+
+
 }
 

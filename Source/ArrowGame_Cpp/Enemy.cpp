@@ -4,11 +4,11 @@
 #include "Enemy.h"
 #include "EnemyAIController.h"
 #include "EnemyAnimInstance.h"
+#include "MyActorComponent.h"
 
 // Sets default values
 AEnemy::AEnemy()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SM(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonAurora/Characters/Heroes/Aurora/Meshes/Aurora.Aurora'"));
@@ -29,6 +29,8 @@ AEnemy::AEnemy()
 
 	AIControllerClass = AEnemyAIController::StaticClass();
 
+
+	MyActorComponent = CreateDefaultSubobject<UMyActorComponent>(FName("MyActorComponent"));
 
 }
 

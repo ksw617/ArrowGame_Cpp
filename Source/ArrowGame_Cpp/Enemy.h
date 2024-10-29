@@ -13,23 +13,20 @@ class ARROWGAME_CPP_API AEnemy : public ACharacter
 private:
 	UPROPERTY(VisibleAnywhere)
 	class UEnemyAnimInstance* EnemyAnimInstace;
+	UPROPERTY(VisibleAnywhere)
+	class UMyActorComponent* MyActorComponent;
 private:
 	bool IsAttacking = false;
 public:
-	// Sets default values for this character's properties
 	AEnemy();
 public:
 	bool GetIsAttacking() const { return IsAttacking; }
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:

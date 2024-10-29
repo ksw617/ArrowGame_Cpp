@@ -11,35 +11,49 @@ class ARROWGAME_CPP_API AArcher : public ACharacter
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(VisibleAnywhere)
-	class USpringArmComponent* SpringArm;
-	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* Camera;
-	UPROPERTY(VisibleAnywhere)
-	class UPlayerAnimInstance* PlayerAnimInstance; 
-public:
-	UPROPERTY(VisibleAnywhere)
-	class UMyActorComponent* MyActorComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UCameraComponent* FollowCamera;
+
+	//Input
+		/** MappingContext */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputMappingContext* DefaultMappingContext;
+
+	//Action
+	/** Jump Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* JumpAction;
+
+	/** Move Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* MoveAction;
+
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* LookAction;
 
 public:
-	// Sets default values for this character's properties
 	AArcher();
+protected:
+	/** Called for movement input */
+	//void Move(const FInputActionValue& Value);
+	//
+	///** Called for looking input */
+	//void Look(const FInputActionValue& Value);
 
 protected:
-	// Called when the game starts or when spawned
+
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+
 public:
-	void KeyUpDown(float Value);
-	void KeyLeftRight(float Value);
-	void MouseLookLeftRight(float Value);
-	void MouseLookUpDown(float Value);
-	void Fire();
+	/** Returns CameraBoom subobject **/
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Returns FollowCamera subobject **/
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 };
