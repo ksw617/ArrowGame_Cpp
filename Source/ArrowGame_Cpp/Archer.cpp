@@ -13,6 +13,11 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 
+//Ãß°¡
+#include "PlayerAnimInstance.h"
+#include "Arrow.h"
+#include "MyActorComponent.h"
+
 // Sets default values
 AArcher::AArcher()
 {
@@ -52,12 +57,21 @@ AArcher::AArcher()
 		GetMesh()->SetSkeletalMesh(SM.Object);
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
 	}
+
+
+	MyActorComponent = CreateDefaultSubobject<UMyActorComponent>(TEXT("MyActorComponent"));
+
 }
+
 
 // Called when the game starts or when spawned
 void AArcher::BeginPlay()
 {
 	Super::BeginPlay();
+
+	auto AnimInstance = GetMesh()->GetAnimInstance();
+	PlayerAnimInstance = Cast<UPlayerAnimInstance>(AnimInstance);
+
 
 }
 
@@ -82,13 +96,72 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
+		// Jumping
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AArcher::Fire);
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Completed, this, &AArcher::StopFire);
+
+
 		//// Moving
-		//EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AArcher::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AArcher::Move);
 		//
 		//// Looking
-		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AArcher::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AArcher::Look);
 	}
 
 
 }
+
+void AArcher::Move(const FInputActionValue& Value)
+{
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		AddMovementInput(ForwardDirection, MovementVector.Y);
+		AddMovementInput(RightDirection, MovementVector.X);
+	}
+
+}
+
+void AArcher::Look(const FInputActionValue& Value)
+{
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	if (Controller != nullptr)
+	{
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+
+	}
+}
+
+void AArcher::Fire()
+{
+	if (IsValid(PlayerAnimInstance))
+	{
+		PlayerAnimInstance->PlayFireMontage();
+
+		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
+		FVector SocketLocation = SocketTransform.GetLocation();
+		FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
+		FActorSpawnParameters params;
+		params.Owner = this;
+
+		auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, params);
+
+	}
+
+}
+
+void AArcher::StopFire()
+{
+	UE_LOG(LogTemp, Log, TEXT("StopFire"));
+}
+
 

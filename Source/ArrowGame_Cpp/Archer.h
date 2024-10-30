@@ -17,8 +17,15 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
-	//Input
-		/** MappingContext */
+	UPROPERTY(VisibleAnywhere)
+	class UPlayerAnimInstance* PlayerAnimInstance;
+public:
+	UPROPERTY(VisibleAnywhere)
+	class UMyActorComponent* MyActorComponent;
+
+
+private:
+	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
 
@@ -35,14 +42,21 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* FireAction;
+
 public:
 	AArcher();
 protected:
 	/** Called for movement input */
-	//void Move(const FInputActionValue& Value);
+	void Move(const struct FInputActionValue& Value);
 	//
 	///** Called for looking input */
-	//void Look(const FInputActionValue& Value);
+	void Look(const struct FInputActionValue& Value);
+
+
+	void Fire();
+	void StopFire();
 
 protected:
 
@@ -55,5 +69,7 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+
 
 };
