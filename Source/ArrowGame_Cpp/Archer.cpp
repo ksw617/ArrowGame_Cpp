@@ -13,10 +13,13 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 
-//추가
 #include "PlayerAnimInstance.h"
 #include "Arrow.h"
 #include "MyActorComponent.h"
+
+//Aim 추가
+#include "Kismet/GameplayStatics.h"
+#include "Camera/PlayerCameraManager.h"
 
 // Sets default values
 AArcher::AArcher()
@@ -24,9 +27,6 @@ AArcher::AArcher()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
 
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
@@ -63,6 +63,12 @@ AArcher::AArcher()
 
 }
 
+
+float AArcher::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	UE_LOG(LogTemp, Log, TEXT("Player Damaged : %f"), Damage);
+	return 0.0f;
+}
 
 // Called when the game starts or when spawned
 void AArcher::BeginPlay()
@@ -111,21 +117,13 @@ void AArcher::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+
 void AArcher::Move(const FInputActionValue& Value)
 {
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
-	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-		AddMovementInput(RightDirection, MovementVector.X);
-	}
+	AddMovementInput(GetActorForwardVector(), MovementVector.Y);
+	AddMovementInput(GetActorRightVector(), MovementVector.X);
 
 }
 
@@ -147,13 +145,47 @@ void AArcher::Fire()
 	{
 		PlayerAnimInstance->PlayFireMontage();
 
+		float AttackRange = 1000.f;
+
+		FHitResult HitResult;
+
+		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+
+		FVector AimLocation = CameraManager->GetCameraLocation();
+		FVector TargetLocation = AimLocation + CameraManager->GetActorForwardVector() * AttackRange;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		bool Result = GetWorld()->LineTraceSingleByChannel
+		(
+			OUT HitResult,
+			AimLocation,
+			TargetLocation,
+			ECollisionChannel::ECC_GameTraceChannel1,
+			Params
+		);
+
+		if (Result)
+		{
+			TargetLocation = HitResult.ImpactPoint;
+			DrawDebugLine(GetWorld(), AimLocation, TargetLocation, FColor::Green, true);
+
+		}
+		else
+		{
+			DrawDebugLine(GetWorld(), AimLocation, TargetLocation, FColor::Red, true);
+		}
+
 		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
 		FVector SocketLocation = SocketTransform.GetLocation();
-		FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
-		FActorSpawnParameters params;
-		params.Owner = this;
+		
+		FVector DeltaVector = TargetLocation - SocketLocation;
 
-		auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, params);
+		FRotator SocketRotation = FRotationMatrix::MakeFromX(DeltaVector).Rotator();
+		FActorSpawnParameters ArrowParams;
+		ArrowParams.Owner = this;
+		ArrowParams.Instigator = this;
+		auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, ArrowParams);
 
 	}
 

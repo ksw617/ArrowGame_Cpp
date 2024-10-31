@@ -4,14 +4,13 @@
 #include "Arrow.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 
 // Sets default values
 AArrow::AArrow()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	DefaultRoot = CreateDefaultSubobject<USceneComponent>(FName("DefaultRoot"));
@@ -48,14 +47,14 @@ AArrow::AArrow()
 	{
 		HitParticleSystem = ParticleAsset.Object;
 	}
-	
+
 }
 
 // Called when the game starts or when spawned
 void AArrow::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -75,5 +74,12 @@ void AArrow::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticleSystem, CollisionBox->GetComponentLocation(), FRotator::ZeroRotator, true);
+
+
+	UGameplayStatics::ApplyDamage(OtherActor, 10.f, ProjectileMovement->GetOwner()->GetInstigatorController(), nullptr, NULL);
+
+
+	FTimerHandle TimerHandler;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandler, [&]() {Destroy(); }, 3.f, false);
 }
 

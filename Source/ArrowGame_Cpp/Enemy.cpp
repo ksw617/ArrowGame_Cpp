@@ -44,6 +44,12 @@ void AEnemy::BeginPlay()
 	
 }
 
+float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	UE_LOG(LogTemp, Log, TEXT("Enemy Damaged : %f"), Damage);
+	return 0.0f;
+}
+
 // Called every frame
 void AEnemy::Tick(float DeltaTime)
 {
@@ -76,5 +82,27 @@ void AEnemy::Attack()
 void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	IsAttacking = false;
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+
+	float AttackRange = 100.f;
+	float AttackRadius = 50.f;
+
+	bool Result = GetWorld()->SweepSingleByChannel
+	(
+		OUT HitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * AttackRange,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel1,
+		FCollisionShape::MakeSphere(AttackRadius),
+		Params
+	);
+
+	if (Result && HitResult.GetActor())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Hit : %s"), *HitResult.GetActor()->GetName());
+	}
 }
 

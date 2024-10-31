@@ -23,7 +23,6 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UMyActorComponent* MyActorComponent;
 
-
 private:
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -59,7 +58,7 @@ protected:
 	void StopFire();
 
 protected:
-
+	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
