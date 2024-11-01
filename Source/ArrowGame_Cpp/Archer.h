@@ -22,6 +22,8 @@ private:
 public:
 	UPROPERTY(VisibleAnywhere)
 	class UMyActorComponent* MyActorComponent;
+	UPROPERTY(VisibleAnywhere)
+	class UWidgetComponent* HpBar;
 
 private:
 	/** MappingContext */
@@ -58,7 +60,7 @@ protected:
 	void StopFire();
 
 protected:
-	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

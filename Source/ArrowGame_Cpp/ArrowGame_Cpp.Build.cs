@@ -8,7 +8,7 @@ public class ArrowGame_Cpp : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "NavigationSystem", "AIModule" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "NavigationSystem", "AIModule", "UMG" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

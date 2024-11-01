@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "MyActorComponent.generated.h"
 
+ DECLARE_MULTICAST_DELEGATE(FOnHpChanged)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ARROWGAME_CPP_API UMyActorComponent : public UActorComponent
@@ -25,16 +26,21 @@ public:
 	int32 GetHp() const { return Hp; }
 
 public:	
-	// Sets default values for this component's properties
 	UMyActorComponent();
+
+public:
+	FOnHpChanged OnHpChanged;
 
 protected:
 	virtual void InitializeComponent() override;
-	// Called when the game starts
 	virtual void BeginPlay() override;
 public:
 	void SetLevel(int32 Lv);
 	void OnDamaged(float DamageAmount);
+
+	//Ãß°¡
+	void SetHp(int32 NewHp);
+	float GetHpRatio();
 
 		
 };

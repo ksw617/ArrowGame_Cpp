@@ -7,7 +7,6 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-//Input
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -17,9 +16,12 @@
 #include "Arrow.h"
 #include "MyActorComponent.h"
 
-//Aim Ãß°¡
 #include "Kismet/GameplayStatics.h"
 #include "Camera/PlayerCameraManager.h"
+
+//UI
+#include "Components/WidgetComponent.h"
+#include "MyUserWidget.h"
 
 // Sets default values
 AArcher::AArcher()
@@ -61,13 +63,25 @@ AArcher::AArcher()
 
 	MyActorComponent = CreateDefaultSubobject<UMyActorComponent>(TEXT("MyActorComponent"));
 
+	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBar"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+	static ConstructorHelpers::FClassFinder<UMyUserWidget> UW(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_HpBar.WBP_HpBar_C'"));
+	if (UW.Succeeded())
+	{
+		HpBar->SetWidgetClass(UW.Class);
+		HpBar->SetDrawSize(FVector2D(200.f, 25.f));
+		HpBar->SetRelativeLocation(FVector(0.f, 0.f, 200.f));
+
+	}
+
 }
 
 
 float AArcher::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Log, TEXT("Player Damaged : %f"), Damage);
-	return 0.0f;
+	MyActorComponent->OnDamaged(Damage);
+	return Damage;
 }
 
 // Called when the game starts or when spawned
@@ -77,6 +91,13 @@ void AArcher::BeginPlay()
 
 	auto AnimInstance = GetMesh()->GetAnimInstance();
 	PlayerAnimInstance = Cast<UPlayerAnimInstance>(AnimInstance);
+
+	auto HpWidget = Cast<UMyUserWidget>(HpBar->GetUserWidgetObject());
+	if (HpWidget)
+	{			
+		HpWidget->BindHp(MyActorComponent);
+
+	}
 
 
 }

@@ -5,6 +5,7 @@
 #include "EnemyAIController.h"
 #include "EnemyAnimInstance.h"
 #include "MyActorComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -89,20 +90,39 @@ void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	float AttackRange = 100.f;
 	float AttackRadius = 50.f;
 
+	FVector Center = GetActorLocation();
+	FVector Forward = GetActorLocation() + GetActorForwardVector() * AttackRange;
+
 	bool Result = GetWorld()->SweepSingleByChannel
 	(
 		OUT HitResult,
-		GetActorLocation(),
-		GetActorLocation() + GetActorForwardVector() * AttackRange,
+		Center,
+		Forward,
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel1,
 		FCollisionShape::MakeSphere(AttackRadius),
 		Params
 	);
 
+
+	FColor DrawColor;
+	float HalfHeight = AttackRange * 0.5f + AttackRange;
+	FQuat Rotation = FRotationMatrix::MakeFromZ(Forward).ToQuat();
+
+
 	if (Result && HitResult.GetActor())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Hit : %s"), *HitResult.GetActor()->GetName());
+		DrawColor = FColor::Green;
+		AActor* HitActor = HitResult.GetActor();
+		UGameplayStatics::ApplyDamage(HitActor, 10.f, GetController(), nullptr, NULL);
+
 	}
+	else
+	{
+		DrawColor = FColor::Red;
+
+	}
+
+	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius, Rotation, DrawColor, false, 2.f);
 }
 
